@@ -22,7 +22,7 @@ Sistema ERP para gestão de pedidos de fornecedores desenvolvido em Laravel 12 c
 ### 1. Clone o repositório
 
 ```bash
-git clone -
+git clone git@github.com:gustavobotti/erp-pedidos.git
 cd erp-pedidos
 ```
 
