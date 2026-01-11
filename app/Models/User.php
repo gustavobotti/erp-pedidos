@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'type',
+        'status',
     ];
 
     /**
@@ -43,6 +45,39 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status' => 'boolean',
         ];
+    }
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->type === 'admin';
+    }
+
+    /**
+     * Check if user is vendedor
+     */
+    public function isVendedor(): bool
+    {
+        return $this->type === 'vendedor';
+    }
+
+    /**
+     * Relationship with suppliers (many-to-many)
+     */
+    public function suppliers()
+    {
+        return $this->belongsToMany(Supplier::class);
+    }
+
+    /**
+     * Relationship with orders
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

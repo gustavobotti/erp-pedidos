@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -22,6 +25,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::resource('products', ProductController::class);
+
+    // Apenas admin
+    Route::middleware('admin')->group(function () {
+        Route::resource('users', UserController::class);
+    });
+
+    Route::middleware('admin')->group(function () {
+        Route::resource('suppliers', SupplierController::class);
+        Route::post('/fetch-address', [SupplierController::class, 'fetchAddress'])->name('fetch-address');
+    });
 });
 
 require __DIR__.'/auth.php';

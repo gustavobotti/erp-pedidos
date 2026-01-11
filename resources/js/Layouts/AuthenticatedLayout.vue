@@ -39,6 +39,26 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    v-if="$page.props.auth.user.type === 'admin'"
+                                    :href="route('users.index')"
+                                    :active="route().current('users.*')"
+                                >
+                                    Usuários
+                                </NavLink>
+                                <NavLink
+                                    v-if="$page.props.auth.user.type === 'admin'"
+                                    :href="route('suppliers.index')"
+                                    :active="route().current('suppliers.*')"
+                                >
+                                    Fornecedores
+                                </NavLink>
+                                <NavLink
+                                    :href="route('products.index')"
+                                    :active="route().current('products.*')"
+                                >
+                                    Produtos
+                                </NavLink>
                             </div>
                         </div>
 
@@ -145,6 +165,26 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            v-if="$page.props.auth.user.type === 'admin'"
+                            :href="route('users.index')"
+                            :active="route().current('users.*')"
+                        >
+                            Usuários
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            v-if="$page.props.auth.user.type === 'admin'"
+                            :href="route('suppliers.index')"
+                            :active="route().current('suppliers.*')"
+                        >
+                            Fornecedores
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('products.index')"
+                            :active="route().current('products.*')"
+                        >
+                            Produtos
                         </ResponsiveNavLink>
                     </div>
 
