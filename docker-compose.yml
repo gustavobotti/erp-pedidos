@@ -9,6 +9,7 @@ services:
     working_dir: /var/www
     volumes:
       - ./:/var/www
+      - vendor_data:/var/www/vendor
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       - erp_network
@@ -76,6 +77,7 @@ services:
     working_dir: /var/www
     volumes:
       - ./:/var/www
+      - node_modules_data:/var/www/node_modules
     networks:
       - erp_network
     ports:
@@ -90,4 +92,8 @@ networks:
 
 volumes:
   mysql_data:
+    driver: local
+  vendor_data:
+    driver: local
+  node_modules_data:
     driver: local
