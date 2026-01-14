@@ -126,6 +126,18 @@ class SupplierController extends Controller
      */
     public function destroy(Supplier $supplier)
     {
+        // Verificar se existem pedidos relacionados a este fornecedor
+        if ($supplier->orders()->exists()) {
+            return redirect()->route('suppliers.index')
+                ->with('error', 'Não foi possível apagar pois existem pedidos relacionados a esse Fornecedor.');
+        }
+
+        // Verificar se existem produtos relacionados a este fornecedor
+        if ($supplier->products()->exists()) {
+            return redirect()->route('suppliers.index')
+                ->with('error', 'Não foi possível apagar pois existem produtos relacionados a esse Fornecedor.');
+        }
+
         $supplier->delete();
 
         return redirect()->route('suppliers.index')

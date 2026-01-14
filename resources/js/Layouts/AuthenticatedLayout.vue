@@ -5,6 +5,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import FlashMessages from '@/Components/FlashMessages.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
@@ -12,6 +13,7 @@ const showingNavigationDropdown = ref(false);
 
 <template>
     <div>
+        <FlashMessages />
         <div class="min-h-screen bg-gray-100">
             <nav
                 class="border-b border-gray-100 bg-white"
@@ -58,6 +60,19 @@ const showingNavigationDropdown = ref(false);
                                     :active="route().current('products.*')"
                                 >
                                     Produtos
+                                </NavLink>
+                                <NavLink
+                                    :href="route('orders.index')"
+                                    :active="route().current('orders.*')"
+                                >
+                                    Pedidos
+                                </NavLink>
+                                <NavLink
+                                    v-if="$page.props.auth.user.type === 'admin'"
+                                    :href="route('api-tests')"
+                                    :active="route().current('api-tests')"
+                                >
+                                    Testes API
                                 </NavLink>
                             </div>
                         </div>
@@ -185,6 +200,18 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('products.*')"
                         >
                             Produtos
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('orders.index')"
+                            :active="route().current('orders.*')"
+                        >
+                            Pedidos
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('api-tests')"
+                            :active="route().current('api-tests')"
+                        >
+                            Testes API
                         </ResponsiveNavLink>
                     </div>
 

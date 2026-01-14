@@ -4,11 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Supplier;
+use App\Services\ProductCacheService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ProductController extends Controller
 {
+    protected $productCacheService;
+
+    public function __construct(ProductCacheService $productCacheService)
+    {
+        $this->productCacheService = $productCacheService;
+    }
     /**
      * Display a listing of products.
      */
@@ -16,9 +23,13 @@ class ProductController extends Controller
     {
         $query = Product::with('supplier');
 
+        $query->whereHas('supplier', function ($q) {
+            $q->where('status', true);
+        });
+
         // Filter by supplier if user is vendedor
         if (auth()->user()->isVendedor()) {
-            $supplierIds = auth()->user()->suppliers()->pluck('suppliers.id')->toArray();
+            $supplierIds = auth()->user()->suppliers()->where('status', true)->pluck('suppliers.id')->toArray();
 
             // Se o vendedor não tem fornecedores vinculados, não mostra nenhum produto
             if (empty($supplierIds)) {
@@ -74,6 +85,12 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
         ]);
 
+        // Check if supplier is active
+        $supplier = Supplier::find($validated['supplier_id']);
+        if (!$supplier || !$supplier->status) {
+            return back()->withErrors(['supplier_id' => 'Não é possível criar produtos para fornecedores inativos.']);
+        }
+
         // Check if user has access to the supplier
         if (auth()->user()->isVendedor()) {
             $hasAccess = auth()->user()->suppliers()->where('suppliers.id', $validated['supplier_id'])->exists();
@@ -83,6 +100,9 @@ class ProductController extends Controller
         }
 
         Product::create($validated);
+
+        // Clear cache for this supplier
+        $this->productCacheService->clearSupplierCache($validated['supplier_id']);
 
         return redirect()->route('products.index')
             ->with('success', 'Produto cadastrado com sucesso!');
@@ -144,6 +164,12 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
         ]);
 
+        // Check if supplier is active
+        $supplier = Supplier::find($validated['supplier_id']);
+        if (!$supplier || !$supplier->status) {
+            return back()->withErrors(['supplier_id' => 'Não é possível atualizar produtos para fornecedores inativos.']);
+        }
+
         // Check if user has access to the supplier
         if (auth()->user()->isVendedor()) {
             $hasAccess = auth()->user()->suppliers()->where('suppliers.id', $validated['supplier_id'])->exists();
@@ -152,7 +178,14 @@ class ProductController extends Controller
             }
         }
 
+        $oldSupplierId = $product->supplier_id;
         $product->update($validated);
+
+        // Clear cache for old and new supplier if changed
+        $this->productCacheService->clearSupplierCache($oldSupplierId);
+        if ($oldSupplierId != $validated['supplier_id']) {
+            $this->productCacheService->clearSupplierCache($validated['supplier_id']);
+        }
 
         return redirect()->route('products.index')
             ->with('success', 'Produto atualizado com sucesso!');
@@ -171,7 +204,17 @@ class ProductController extends Controller
             }
         }
 
+        // Verificar se existem pedidos relacionados a este produto
+        if ($product->orderItems()->exists()) {
+            return redirect()->route('products.index')
+                ->with('error', 'Não foi possível apagar esse produto pois existem pedidos relacionados a ele.');
+        }
+
+        $supplierId = $product->supplier_id;
         $product->delete();
+
+        // Clear cache for this supplier
+        $this->productCacheService->clearSupplierCache($supplierId);
 
         return redirect()->route('products.index')
             ->with('success', 'Produto excluído com sucesso!');

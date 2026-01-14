@@ -8,28 +8,27 @@ const props = defineProps({
 });
 
 const form = useForm({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    type: 'vendedor',
-    status: true,
-    supplier_ids: [],
+    supplier_id: '',
+    date: new Date().toISOString().split('T')[0],
+    observation: '',
+    status: 'Pendente',
+    products: [],
 });
 
-
 const submit = () => {
-    form.post(route('users.store'));
+    form.post(route('orders.store'), {
+        preserveScroll: true,
+    });
 };
 </script>
 
 <template>
-    <Head title="Novo Usuário" />
+    <Head title="Novo Pedido" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Criar Novo Usuário
+                Criar Novo Pedido
             </h2>
         </template>
 
@@ -39,7 +38,7 @@ const submit = () => {
                     <Form
                         :form="form"
                         :suppliers="suppliers"
-                        submit-label="Criar Usuário"
+                        submit-label="Criar Pedido"
                         @submit="submit"
                     />
                 </div>

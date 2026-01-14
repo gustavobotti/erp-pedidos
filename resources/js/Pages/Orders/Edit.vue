@@ -4,32 +4,37 @@ import Form from './Form.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
+    order: Object,
     suppliers: Array,
+    initialProducts: Array,
 });
 
 const form = useForm({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    type: 'vendedor',
-    status: true,
-    supplier_ids: [],
+    supplier_id: props.order.supplier_id,
+    date: props.order.date,
+    observation: props.order.observation || '',
+    status: props.order.status,
+    products: props.order.items.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit_price: parseFloat(item.unit_price),
+    })),
 });
 
-
 const submit = () => {
-    form.post(route('users.store'));
+    form.put(route('orders.update', props.order.id), {
+        preserveScroll: true,
+    });
 };
 </script>
 
 <template>
-    <Head title="Novo Usuário" />
+    <Head title="Editar Pedido" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Criar Novo Usuário
+                Editar Pedido #{{ order.id }}
             </h2>
         </template>
 
@@ -39,7 +44,9 @@ const submit = () => {
                     <Form
                         :form="form"
                         :suppliers="suppliers"
-                        submit-label="Criar Usuário"
+                        :initial-products="initialProducts"
+                        :is-edit="true"
+                        submit-label="Atualizar Pedido"
                         @submit="submit"
                     />
                 </div>
