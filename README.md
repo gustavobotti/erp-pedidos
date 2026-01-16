@@ -1,6 +1,9 @@
 # ERP Pedidos
 
 Este é um protótipo de sistema de gestão de pedidos com autenticação, autorização por perfil, importação de produtos via CSV processada em background, API REST, cache inteligente com Redis e relatórios automatizados.
+Pretendo revisitá-lo futuramente para adicionar melhorias como mais componentizações no frontend, testes automatizados e outras funcionalidades.
+
+![Preview](preview.png)
 
 ## Funcionalidades
 
