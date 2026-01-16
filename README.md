@@ -1,90 +1,117 @@
-# ERP Pedidos - Sistema de Gestão de Pedidos para Fornecedores
+# ERP Pedidos
 
-Sistema ERP para gestão de pedidos de fornecedores desenvolvido em Laravel 12 com Vue.js e Inertia.js.
+Sistema de gestão de pedidos para fornecedores com Laravel 12 + Vue.js 3 + Inertia.js.
 
-## 🛠️ Tecnologias Utilizadas
+## Stack
 
-- **Backend**: Laravel 12
-- **Frontend**: Vue.js 3 + Inertia.js + DaisyUI
-- **Banco de Dados**: MySQL 8.0
-- **Cache**: Redis
-- **Email Testing**: Mailpit
-- **Container**: Docker & Docker Compose
+**Backend:** Laravel 12 (PHP 8.3) • MySQL 8.0 • Redis  
+**Frontend:** Vue.js 3 • Inertia.js • Vite • Tailwind CSS
+**Infra:** Docker • Nginx • Supervisor • Mailpit
 
-## 📋 Pré-requisitos
+## Pré-requisitos
 
-- Docker
 - Docker Compose
 - Git
 
-## 🚀 Como Rodar o Projeto
+## Instalação
 
-### 1. Clone o repositório
-
+**1. Clone e configure o ambiente:**
 ```bash
 git clone git@github.com:gustavobotti/erp-pedidos.git
 cd erp-pedidos
+cp .env.example .env
 ```
 
-### 2. Configure as permissões (se necessário)
+**2. Edite o `.env` com as credenciais do Docker:**
+```env
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=erp_pedidos
+DB_USERNAME=erp_user
+DB_PASSWORD=erp_password
+
+REDIS_HOST=redis
+CACHE_STORE=redis
+QUEUE_CONNECTION=redis
+
+MAIL_HOST=mailpit
+MAIL_PORT=1025
+```
+
+**3. Suba os containers:**
+```bash
+docker compose up -d
+```
+
+**4. Instale dependências e configure:**
+```bash
+# Dependências PHP
+docker compose exec app composer install
+
+# Gerar APP_KEY
+docker compose exec app php artisan key:generate
+
+# Rodar migrations
+docker compose exec app php artisan migrate
+
+# Seeders (opcional - cria dados de exemplo)
+docker compose exec app php artisan db:seed
+```
+
+**5. Ajustar permissões (Linux/Mac):**
+```bash
+docker compose exec app chown -R erp:erp /var/www
+docker compose exec app chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+```
+
+## Acesso
+
+| Serviço | URL |
+|---------|-----|
+| **Aplicação** | http://localhost:8000 |
+| **Mailpit** | http://localhost:8025 |
+| **Vite (dev)** | http://localhost:5173 |
+
+## Comandos Úteis
 
 ```bash
-sudo chown -R $USER:$USER .
-chmod -R 755 storage bootstrap/cache
+# Logs
+docker compose logs -f app
+
+# Artisan
+docker compose exec app php artisan [comando]
+
+# Composer
+docker compose exec app composer [comando]
+
+# Limpar cache
+docker compose exec app php artisan cache:clear
+
+# Resetar banco com seeders
+docker compose exec app php artisan migrate:fresh --seed
+
+# Parar containers
+docker compose stop
+
+# Remover tudo
+docker compose down -v
 ```
 
-### 3. Suba os containers Docker
+## Containers
 
-```bash
-sudo docker compose up -d
-```
+| Container | Função |
+|-----------|--------|
+| **erp_app** | PHP 8.3-FPM + Supervisor (workers) |
+| **erp_nginx** | Servidor web (porta 8000) |
+| **erp_mysql** | Banco de dados |
+| **erp_redis** | Cache e filas |
+| **erp_mailpit** | Captura emails (dev) |
+| **erp_node** | Vite dev server (hot reload) |
 
-### 4. Instale as dependências do PHP
+## Recursos
 
-```bash
-sudo docker compose exec app composer install
-```
-
-### 5. Configure as permissões do Laravel
-
-```bash
-sudo docker compose exec app chown -R erp:erp /var/www
-sudo docker compose exec app chmod -R 775 /var/www/storage /var/www/bootstrap/cache
-```
-
-### 6. Gere a chave da aplicação (se ainda não foi gerada)
-
-```bash
-sudo docker compose exec app php artisan key:generate
-```
-
-### 7. Execute as migrations
-
-```bash
-sudo docker compose exec app php artisan migrate
-```
-
-### 8. (Opcional) Execute os seeders
-
-```bash
-sudo docker compose exec app php artisan db:seed
-```
-
-## 🌐 Acessando a Aplicação
-
-Após subir os containers, a aplicação estará disponível em:
-
-- **Aplicação Web**: http://localhost:8000
-- **Mailpit (Interface de Email)**: http://localhost:8025
-- **Vite Dev Server**: http://localhost:5173 (usado automaticamente pelo Laravel)
-
-## 📦 Serviços Docker
-
-| Serviço | Container | Porta | Descrição |
-|---------|-----------|-------|-----------|
-| Nginx | erp_nginx | 8000 | Servidor web |
-| PHP-FPM | erp_app | 9000 | Aplicação Laravel |
-| MySQL | erp_mysql | 3306 | Banco de dados |
-| Redis | erp_redis | 6379 | Cache e filas |
-| Mailpit | erp_mailpit | 8025 (Web), 1025 (SMTP) | Servidor de email para testes |
-| Node | erp_node | 5173 | Vite dev server |
+- Supervisor configurado para Laravel Queue Workers
+- Redis para cache e filas
+- Volumes persistentes (mysql_data, vendor_data, node_modules_data)
+- Hot reload automático com Vite

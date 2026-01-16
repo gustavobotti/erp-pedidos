@@ -13,12 +13,20 @@ class UserController extends Controller
     /**
      * Display a listing of users.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::orderBy('created_at', 'desc')->paginate(10);
+        $query = User::query();
+
+        // Search by name
+        if ($request->has('search') && $request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $users = $query->orderBy('created_at', 'desc')->paginate(10)->appends($request->only(['search']));
 
         return Inertia::render('Users/Index', [
             'users' => $users,
+            'filters' => $request->only(['search']),
         ]);
     }
 

@@ -13,12 +13,20 @@ class SupplierController extends Controller
     /**
      * Display a listing of suppliers.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $suppliers = Supplier::with('users')->latest()->paginate(10);
+        $query = Supplier::with('users');
+
+        // Search by name
+        if ($request->has('search') && $request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $suppliers = $query->latest()->paginate(10)->appends($request->only(['search']));
 
         return Inertia::render('Suppliers/Index', [
             'suppliers' => $suppliers,
+            'filters' => $request->only(['search']),
         ]);
     }
 

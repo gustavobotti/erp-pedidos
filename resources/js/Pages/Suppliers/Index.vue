@@ -1,35 +1,40 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
+import PageHeader from '@/Components/Layout/PageHeader.vue';
+import ContentCard from '@/Components/Layout/ContentCard.vue';
+import SearchInput from '@/Components/Form/SearchInput.vue';
+import StatusBadge from '@/Components/Badge/StatusBadge.vue';
+import InfoBadge from '@/Components/Badge/InfoBadge.vue';
+import DataTable from '@/Components/DataTable/DataTable.vue';
+import TableRow from '@/Components/DataTable/TableRow.vue';
+import TableCell from '@/Components/DataTable/TableCell.vue';
+import Pagination from '@/Components/Pagination/Pagination.vue';
+import EmptyState from '@/Components/Table/EmptyState.vue';
+import ActionButtons from '@/Components/Actions/ActionButtons.vue';
 import { formatCNPJ, formatCEP } from '@/Composables/useMasks';
-import { onMounted } from 'vue';
+import { useConfirmDelete } from '@/Composables/useConfirmDelete';
+import { useFilters } from '@/Composables/useFilters';
 
 const props = defineProps({
     suppliers: Object,
+    filters: Object,
 });
 
-onMounted(() => {
-    console.log('Suppliers Index mounted');
-    if (props.suppliers?.data?.[0]) {
-        const firstSupplier = props.suppliers.data[0];
-        console.log('First supplier CNPJ:', firstSupplier.cnpj);
-        console.log('Formatted CNPJ:', formatCNPJ(firstSupplier.cnpj));
-        console.log('First supplier CEP:', firstSupplier.cep);
-        console.log('Formatted CEP:', formatCEP(firstSupplier.cep));
-    }
+const { deleteResource } = useConfirmDelete();
+
+const { filters, applyFilters } = useFilters('suppliers.index', {
+    search: props.filters?.search || '',
 });
 
-const deleteSupplier = (id) => {
-    if (confirm('Tem certeza que deseja excluir este fornecedor?')) {
-        router.delete(route('suppliers.destroy', id), {
-            preserveScroll: true,
-        });
-    }
-};
-
-const getStatusBadge = (status) => {
-    return status ? 'badge-success' : 'badge-error';
-};
+const headers = [
+    { label: 'Nome', class: 'text-gray-900' },
+    { label: 'CNPJ', class: 'text-gray-900' },
+    { label: 'CEP', class: 'text-gray-900' },
+    { label: 'Status', class: 'text-gray-900' },
+    { label: 'Vendedores', class: 'text-gray-900' },
+    { label: 'Ações', class: 'text-gray-900' },
+];
 </script>
 
 <template>
@@ -37,92 +42,62 @@ const getStatusBadge = (status) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                    Gerenciar Fornecedores
-                </h2>
-                <Link
-                    :href="route('suppliers.create')"
-                    class="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-900"
-                >
-                    Novo Fornecedor
-                </Link>
-            </div>
+            <PageHeader title="Gerenciar Fornecedores">
+                <template #actions>
+                    <Link
+                        :href="route('suppliers.create')"
+                        class="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-900"
+                    >
+                        Novo Fornecedor
+                    </Link>
+                </template>
+            </PageHeader>
         </template>
 
         <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="overflow-x-auto">
-                            <table class="table w-full">
-                                <thead class="bg-gray-200">
-                                    <tr>
-                                        <th class="text-gray-900">Nome</th>
-                                        <th class="text-gray-900">CNPJ</th>
-                                        <th class="text-gray-900">CEP</th>
-                                        <th class="text-gray-900">Status</th>
-                                        <th class="text-gray-900">Vendedores</th>
-                                        <th class="text-gray-900">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="supplier in suppliers.data" :key="supplier.id" class="hover:bg-gray-100 border-b border-gray-200">
-                                        <td class="text-gray-900 font-medium">{{ supplier.name }}</td>
-                                        <td class="text-gray-700">{{ formatCNPJ(supplier.cnpj) }}</td>
-                                        <td class="text-gray-700">{{ formatCEP(supplier.cep) }}</td>
-                                        <td>
-                                            <span class="badge" :class="getStatusBadge(supplier.status)">
-                                                {{ supplier.status ? 'Ativo' : 'Inativo' }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-info">
-                                                {{ supplier.users?.length || 0 }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="flex gap-2">
-                                                <Link
-                                                    :href="route('suppliers.edit', supplier.id)"
-                                                    class="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-900"
-                                                >
-                                                    Editar
-                                                </Link>
-                                                <button
-                                                    @click="deleteSupplier(supplier.id)"
-                                                    class="inline-flex items-center rounded-md border border-transparent bg-red-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 active:bg-red-700"
-                                                >
-                                                    Deletar
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr v-if="suppliers.data.length === 0">
-                                        <td colspan="6" class="text-center py-4 text-gray-700">
-                                            Nenhum fornecedor encontrado.
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+                <!-- Search Filter -->
+                <ContentCard>
+                    <SearchInput
+                        v-model="filters.search"
+                        label="Pesquisar por nome:"
+                        placeholder="Digite o nome do fornecedor..."
+                        @update:model-value="applyFilters"
+                    />
+                </ContentCard>
 
-                        <!-- Paginação -->
-                        <div v-if="suppliers.links && suppliers.links.length > 3" class="flex justify-center mt-6 gap-2">
-                            <template v-for="(link, index) in suppliers.links" :key="index">
-                                <Link
-                                    v-if="link.url"
-                                    :href="link.url"
-                                    class="inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold transition duration-150 ease-in-out"
-                                    :class="link.active
-                                        ? 'border-transparent bg-gray-800 text-white hover:bg-gray-700'
-                                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'"
-                                    v-html="link.label"
-                                />
-                            </template>
-                        </div>
-                    </div>
-                </div>
+                <!-- Suppliers Table -->
+                <ContentCard>
+                    <DataTable :headers="headers">
+                        <template #body>
+                            <TableRow v-for="supplier in suppliers.data" :key="supplier.id">
+                                <TableCell variant="bold">{{ supplier.name }}</TableCell>
+                                <TableCell>{{ formatCNPJ(supplier.cnpj) }}</TableCell>
+                                <TableCell>{{ formatCEP(supplier.cep) }}</TableCell>
+                                <TableCell>
+                                    <StatusBadge :status="supplier.status" />
+                                </TableCell>
+                                <TableCell>
+                                    <InfoBadge variant="info">
+                                        {{ supplier.users?.length || 0 }}
+                                    </InfoBadge>
+                                </TableCell>
+                                <TableCell>
+                                    <ActionButtons
+                                        :edit-route="route('suppliers.edit', supplier.id)"
+                                        :on-delete="() => deleteResource('suppliers.destroy', supplier.id)"
+                                    />
+                                </TableCell>
+                            </TableRow>
+                            <EmptyState
+                                v-if="suppliers.data.length === 0"
+                                message="Nenhum fornecedor encontrado."
+                            />
+                        </template>
+                    </DataTable>
+
+                    <Pagination :data="suppliers" resource-name="fornecedores" />
+                </ContentCard>
             </div>
         </div>
     </AuthenticatedLayout>

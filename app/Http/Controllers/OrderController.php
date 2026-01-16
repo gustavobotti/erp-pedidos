@@ -61,7 +61,7 @@ class OrderController extends Controller
             $query->whereDate('date', '<=', $request->date_to);
         }
 
-        $orders = $query->latest('date')->paginate(10);
+        $orders = $query->latest('date')->paginate(10)->appends($request->only(['supplier_id', 'status', 'date_from', 'date_to']));
 
         // Get suppliers for filter
         $suppliers = auth()->user()->isAdmin()
@@ -349,5 +349,18 @@ class OrderController extends Controller
 
         return response()->json($products);
     }
-}
 
+    /**
+     * Send daily orders report to the authenticated user.
+     */
+    public function sendDailyReport(Request $request)
+    {
+        $user = auth()->user();
+
+        \Illuminate\Support\Facades\Artisan::call('orders:daily-report', [
+            '--email' => $user->email
+        ]);
+
+        return back()->with('success', 'Relatório enviado para ' . $user->email);
+    }
+}

@@ -1,7 +1,19 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, Link } from '@inertiajs/vue3';
+import PageHeader from '@/Components/Layout/PageHeader.vue';
+import ContentCard from '@/Components/Layout/ContentCard.vue';
+import SelectInput from '@/Components/Form/SelectInput.vue';
+import DataTable from '@/Components/DataTable/DataTable.vue';
+import TableRow from '@/Components/DataTable/TableRow.vue';
+import TableCell from '@/Components/DataTable/TableCell.vue';
+import Pagination from '@/Components/Pagination/Pagination.vue';
+import EmptyState from '@/Components/Table/EmptyState.vue';
+import ActionButtons from '@/Components/Actions/ActionButtons.vue';
+import InfoBadge from '@/Components/Badge/InfoBadge.vue';
+import { useConfirmDelete } from '@/Composables/useConfirmDelete';
+import { useFormatters } from '@/Composables/useFormatters';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
     products: Object,
@@ -9,23 +21,32 @@ const props = defineProps({
     filters: Object,
 });
 
+const { deleteResource } = useConfirmDelete();
+const { formatCurrency } = useFormatters();
+
 const selectedSupplier = ref(props.filters?.supplier_id || '');
 
-const filterBySupplier = () => {
+watch(selectedSupplier, (value) => {
     router.get(route('products.index'), {
-        supplier_id: selectedSupplier.value
+        supplier_id: value || undefined,
     }, {
         preserveState: true,
+        replace: true,
     });
-};
+});
 
-const deleteProduct = (id) => {
-    if (confirm('Tem certeza que deseja excluir este produto?')) {
-        router.delete(route('products.destroy', id), {
-            preserveScroll: true,
-        });
-    }
-};
+const headers = [
+    { label: 'Referência', class: 'text-gray-900' },
+    { label: 'Nome', class: 'text-gray-900' },
+    { label: 'Cor', class: 'text-gray-900' },
+    { label: 'Preço', class: 'text-gray-900' },
+    { label: 'Fornecedor', class: 'text-gray-900' },
+    { label: 'Ações', class: 'text-gray-900' },
+];
+
+const supplierOptions = computed(() =>
+    props.suppliers.map(s => ({ value: s.id, label: s.name }))
+);
 </script>
 
 <template>
@@ -33,116 +54,73 @@ const deleteProduct = (id) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                    Gerenciar Produtos
-                </h2>
-                <Link
-                    :href="route('products.create')"
-                    class="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-900"
-                >
-                    Novo Produto
-                </Link>
-            </div>
+            <PageHeader title="Gerenciar Produtos">
+                <template #actions>
+                    <Link
+                        :href="route('products.import')"
+                        class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition duration-150 ease-in-out hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        Importar Produtos
+                    </Link>
+                    <Link
+                        :href="route('products.create')"
+                        class="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-900"
+                    >
+                        Novo Produto
+                    </Link>
+                </template>
+            </PageHeader>
         </template>
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
                 <!-- Filter -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center space-x-4">
-                            <label class="text-sm font-medium text-gray-700">
-                                Filtrar por fornecedor:
-                            </label>
-                            <select
-                                v-model="selectedSupplier"
-                                @change="filterBySupplier"
-                                class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-900"
-                            >
-                                <option value="">Todos</option>
-                                <option
-                                    v-for="supplier in suppliers"
-                                    :key="supplier.id"
-                                    :value="supplier.id"
-                                >
-                                    {{ supplier.name }}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+                <ContentCard>
+                    <SelectInput
+                        v-model="filters.supplier_id"
+                        :options="supplierOptions"
+                        label="Filtrar por fornecedor:"
+                        placeholder="Todos"
+                        value-key="value"
+                        label-key="label"
+                        @change="applyFilters"
+                    />
+                </ContentCard>
 
                 <!-- Products Table -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="overflow-x-auto">
-                            <table class="table w-full">
-                                <thead class="bg-gray-200">
-                                    <tr>
-                                        <th class="text-gray-900">Referência</th>
-                                        <th class="text-gray-900">Nome</th>
-                                        <th class="text-gray-900">Cor</th>
-                                        <th class="text-gray-900">Preço</th>
-                                        <th class="text-gray-900">Fornecedor</th>
-                                        <th class="text-gray-900">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="product in products.data" :key="product.id" class="hover:bg-gray-100 border-b border-gray-200">
-                                        <td class="text-gray-700">{{ product.reference }}</td>
-                                        <td class="text-gray-900 font-medium">{{ product.name }}</td>
-                                        <td class="text-gray-700">{{ product.color }}</td>
-                                        <td class="text-gray-900">R$ {{ parseFloat(product.price).toFixed(2) }}</td>
-                                        <td>
-                                            <span class="inline-flex items-center rounded-md bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800">
-                                                {{ product.supplier?.name }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="flex gap-2">
-                                                <Link
-                                                    :href="route('products.edit', product.id)"
-                                                    class="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-900"
-                                                >
-                                                    Editar
-                                                </Link>
-                                                <button
-                                                    @click="deleteProduct(product.id)"
-                                                    class="inline-flex items-center rounded-md border border-transparent bg-red-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 active:bg-red-700"
-                                                >
-                                                    Deletar
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr v-if="products.data.length === 0">
-                                        <td colspan="6" class="text-center py-4 text-gray-700">
-                                            Nenhum produto encontrado.
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                <ContentCard>
+                    <DataTable :headers="headers">
+                        <template #body>
+                            <TableRow v-for="product in products.data" :key="product.id">
+                                <TableCell>{{ product.reference }}</TableCell>
+                                <TableCell variant="bold">{{ product.name }}</TableCell>
+                                <TableCell>{{ product.color }}</TableCell>
+                                <TableCell variant="medium">{{ formatCurrency(product.price) }}</TableCell>
+                                <TableCell>
+                                    <InfoBadge variant="info">
+                                        {{ product.supplier?.name }}
+                                    </InfoBadge>
+                                </TableCell>
+                                <TableCell>
+                                    <ActionButtons
+                                        :edit-route="route('products.edit', product.id)"
+                                        :on-delete="() => deleteResource('products.destroy', product.id)"
+                                    />
+                                </TableCell>
+                            </TableRow>
+                            <EmptyState
+                                v-if="products.data.length === 0"
+                                message="Nenhum produto encontrado."
+                            />
+                        </template>
+                    </DataTable>
 
-                        <!-- Paginação -->
-                        <div v-if="products.links && products.links.length > 3" class="flex justify-center mt-6 gap-2">
-                            <template v-for="(link, index) in products.links" :key="index">
-                                <Link
-                                    v-if="link.url"
-                                    :href="link.url"
-                                    class="inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold transition duration-150 ease-in-out"
-                                    :class="link.active
-                                        ? 'border-transparent bg-gray-800 text-white hover:bg-gray-700'
-                                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'"
-                                    v-html="link.label"
-                                />
-                            </template>
-                        </div>
-                    </div>
-                </div>
+                    <Pagination :data="products" resource-name="produtos" />
+                </ContentCard>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
-

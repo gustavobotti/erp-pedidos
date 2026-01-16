@@ -22,6 +22,13 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
-        "vue-the-mask": "^0.11.1"
+        "@vuepic/vue-datepicker": "^12.1.0",
+        "chart.js": "^4.5.1",
+        "flatpickr": "^4.6.13",
+        "vue-chartjs": "^5.3.3",
+        "vue-flatpickr-component": "^12.0.0",
+        "vue-multiselect": "^3.0.0-beta.3",
+        "vue-the-mask": "^0.11.1",
+        "vue-toastification": "^2.0.0-rc.5"
     }
 }

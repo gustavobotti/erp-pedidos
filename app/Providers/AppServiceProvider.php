@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Product;
+use App\Models\Order;
 use App\Observers\ProductObserver;
+use App\Observers\OrderObserver;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,5 +28,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Product's automatic cache invalidation
         Product::observe(ProductObserver::class);
+
+        // Order's automatic cache invalidation for dashboard
+        Order::observe(OrderObserver::class);
     }
 }

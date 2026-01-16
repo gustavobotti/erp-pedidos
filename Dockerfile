@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
     zip \
     unzip \
+    supervisor \
     && docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip opcache
 
 # Instalar Redis extension
@@ -38,5 +39,9 @@ WORKDIR /var/www
 # Copiar arquivos de configuração customizados do PHP
 COPY docker/php/local.ini /usr/local/etc/php/conf.d/local.ini
 
-# Mudar para o usuário criado
-USER $user
+# Copiar configuração do Supervisor
+COPY docker/supervisor/laravel-worker.conf /etc/supervisor/conf.d/laravel-worker.conf
+
+# Comando para iniciar PHP-FPM e Supervisor
+CMD ["sh", "-c", "service supervisor start && php-fpm"]
+

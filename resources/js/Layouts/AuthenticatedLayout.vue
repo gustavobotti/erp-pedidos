@@ -67,13 +67,13 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Pedidos
                                 </NavLink>
-                                <NavLink
-                                    v-if="$page.props.auth.user.type === 'admin'"
-                                    :href="route('api-tests')"
-                                    :active="route().current('api-tests')"
-                                >
-                                    Testes API
-                                </NavLink>
+<!--                                <NavLink-->
+<!--                                    v-if="$page.props.auth.user.type === 'admin'"-->
+<!--                                    :href="route('api-tests')"-->
+<!--                                    :active="route().current('api-tests')"-->
+<!--                                >-->
+<!--                                    Testes API-->
+<!--                                </NavLink>-->
                             </div>
                         </div>
 
