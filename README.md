@@ -68,3 +68,5 @@ docker-compose up -d
 > - Configurar rotas Ziggy
 > - Compilar assets Vue.js com Vite
 > - Ajustar permissões
+
+![Preview](./preview.png)
