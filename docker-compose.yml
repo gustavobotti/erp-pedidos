@@ -14,8 +14,10 @@ services:
     networks:
       - erp_network
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   # Nginx
   nginx:
@@ -48,6 +50,11 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - erp_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   # Redis
   redis:

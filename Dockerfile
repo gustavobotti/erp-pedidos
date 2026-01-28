@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     supervisor \
+    netcat-openbsd \
     && docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip opcache
 
 # Instalar Redis extension
@@ -42,6 +43,10 @@ COPY docker/php/local.ini /usr/local/etc/php/conf.d/local.ini
 # Copiar configuração do Supervisor
 COPY docker/supervisor/laravel-worker.conf /etc/supervisor/conf.d/laravel-worker.conf
 
-# Comando para iniciar PHP-FPM e Supervisor
-CMD ["sh", "-c", "service supervisor start && php-fpm"]
+# Copiar script de entrypoint
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Usar entrypoint para setup automático
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
