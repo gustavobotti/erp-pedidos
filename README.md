@@ -4,14 +4,7 @@ Sistema de gestão de pedidos - Laravel + Vue.js + Docker
 
 ## Pré-requisitos
 
-```bash
-# Instalar Docker e Docker Compose
-sudo apt update
-sudo apt install docker.io docker-compose -y
-sudo usermod -aG docker $USER
-```
-
-> **Importante:** Reinicie o terminal após adicionar seu usuário ao grupo docker
+Docker, Docker Compose
 
 ## Como Rodar
 
@@ -26,15 +19,6 @@ cp .env.example .env
 # 3. Suba os containers (tudo é configurado automaticamente!)
 docker-compose up -d
 ```
-
-> **✨ Pronto!** O Docker irá automaticamente:
-> - Instalar dependências PHP (composer)
-> - Instalar dependências Node.js (npm)
-> - Gerar chave da aplicação
-> - Criar e popular o banco de dados
-> - Configurar rotas Ziggy
-> - Compilar assets Vue.js com Vite
-> - Ajustar permissões
 
 Aguarde alguns instantes e acesse: **http://localhost:8000**
 
@@ -76,3 +60,11 @@ docker-compose down -v
 docker-compose up -d
 ```
 
+## O Docker irá automaticamente
+> - Instalar dependências PHP (composer)
+> - Instalar dependências Node.js (npm)
+> - Gerar chave da aplicação
+> - Criar e popular o banco de dados
+> - Configurar rotas Ziggy
+> - Compilar assets Vue.js com Vite
+> - Ajustar permissões
