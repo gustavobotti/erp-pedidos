@@ -1,3 +1,5 @@
+![Preview](./preview.png)
+
 # ERP Orders
 Order management system - Laravel + Vue.js + Docker
 
@@ -60,5 +62,3 @@ docker-compose up -d
 > - Configure Ziggy routes
 > - Compile Vue.js assets with Vite
 > - Adjust permissions
-
-![Preview](./preview.png)
