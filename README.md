@@ -1,42 +1,35 @@
-# ERP Pedidos
+# ERP Orders
+Order management system - Laravel + Vue.js + Docker
 
-Sistema de gestão de pedidos - Laravel + Vue.js + Docker
-
-## Pré-requisitos
-
+## Prerequisites
 Docker, Docker Compose
 
-## Como Rodar
-
+## How to Run
 ```bash
-# 1. Clone o projeto
+# 1. Clone the project
 git clone git@github.com:gustavobotti/erp-pedidos.git
 cd erp-pedidos
 
-# 2. Configure o ambiente
+# 2. Set up the environment
 cp .env.example .env
 
-# 3. Suba os containers (tudo é configurado automaticamente!)
+# 3. Start the containers (everything is configured automatically!)
 docker-compose up -d
 ```
+Wait a moment and visit: **http://localhost:8000**
 
-Aguarde alguns instantes e acesse: **http://localhost:8000**
-
-### Primeiro Acesso
-
-**Credenciais padrão:**
+### First Access
+**Default credentials:**
 - Email: `admin@erp.com`
-- Senha: `password`
+- Password: `password`
 
-## Acessar
-
+## Access
 - **App:** http://localhost:8000
 - **Emails (Mailpit):** http://localhost:8025
 
 ---
 
-## Tecnologias
-
+## Technologies
 - **Backend:** Laravel 12 (PHP 8.3)
 - **Frontend:** Vue.js 3 + Inertia.js
 - **Styling:** Tailwind CSS + DaisyUI
@@ -47,26 +40,25 @@ Aguarde alguns instantes e acesse: **http://localhost:8000**
 
 ---
 
-## Comandos Úteis
-
+## Useful Commands
 ```bash
-# Ver logs em tempo real
+# View logs in real time
 docker-compose logs -f app      # Laravel/PHP
 docker-compose logs -f node     # Vite/Vue.js
 docker-compose logs -f nginx    # Web server
 
-# Reiniciar do zero (apaga TODOS os dados!)
+# Reset from scratch (deletes ALL data!)
 docker-compose down -v
 docker-compose up -d
 ```
 
-## O Docker irá automaticamente
-> - Instalar dependências PHP (composer)
-> - Instalar dependências Node.js (npm)
-> - Gerar chave da aplicação
-> - Criar e popular o banco de dados
-> - Configurar rotas Ziggy
-> - Compilar assets Vue.js com Vite
-> - Ajustar permissões
+## Docker will automatically
+> - Install PHP dependencies (composer)
+> - Install Node.js dependencies (npm)
+> - Generate the application key
+> - Create and seed the database
+> - Configure Ziggy routes
+> - Compile Vue.js assets with Vite
+> - Adjust permissions
 
 ![Preview](./preview.png)
